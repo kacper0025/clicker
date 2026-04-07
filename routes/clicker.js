@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/Clicker'); // Poprawiona ścieżka do modelu
+const User = require('../models/Clicker');
 const auth = require('../middleware/auth');
 
 router.get('/game', auth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
-        res.render('clicker', { user }); // Zmienione z 'pet' na 'clicker'
+        res.render('clicker', { user });
     } catch (err) {
         res.redirect('/login');
     }
