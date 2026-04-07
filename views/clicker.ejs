@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clicker Game</title>
+</head>
+<body>
+    <h1>Gracz: <%= user.username %></h1>
+    
+    <p>Punkty: <span id="points"><%= user.points %></span></p>
+    <p>Na kliknięcie: <span id="val"><%= user.clickValue %></span></p>
+    <p>Na sekundę (Auto): <span id="auto"><%= user.autoClickPerSecond %></span></p>
+    
+    <button onclick="clickBtn()" style="font-size: 20px; padding: 10px;">KLIKNIJ</button>
+    <hr>
+
+    <h3>Ulepszenia:</h3>
+    <button onclick="buyUpgrade('click')">
+        Ulepsz klik (+1) - Cena: <span id="clickCostDisplay">10</span>
+    </button>
+    <br><br>
+    <button onclick="buyUpgrade('auto')">
+        Autoklik (+1/s) - Cena: <span id="autoCostDisplay">50</span>
+    </button>
+
+    <hr>
+    <button onclick="saveGame()">Zapisz Grę</button>
+    <a href="/logout">Wyloguj</a>
+
+    <script>
+       let points = Number("<%= user.points %>");
+        let clickValue = Number("<%= user.clickValue %>");
+        let autoClick = Number("<%= user.autoClickPerSecond %>");
+
+        // Funkcje obliczające koszty (identycznie jak w grach typu clicker)
+        function getClickCost() {
+            return Math.floor(10 * Math.pow(1.5, (clickValue - 1)));
+        }
+
+        function getAutoCost() {
+            return Math.floor(50 * Math.pow(1.5, autoClick));
+        }
+
+        // Aktualizacja liczb na ekranie
+        function updateUI() {
+            document.getElementById('points').innerText = Math.floor(points);
+            document.getElementById('val').innerText = clickValue;
+            document.getElementById('auto').innerText = autoClick;
+            
+            // Tutaj aktualizujemy ceny na przyciskach
+            document.getElementById('clickCostDisplay').innerText = getClickCost();
+            document.getElementById('autoCostDisplay').innerText = getAutoCost();
+        }
+
+        // Klikanie
+        function clickBtn() {
+            points += clickValue;
+            updateUI();
+        }
+
+        // Automatyczne dodawanie co sekundę
+        setInterval(() => {
+            if (autoClick > 0) {
+                points += autoClick;
+                updateUI();
+            }
+        }, 1000);
+
+        // Kupowanie
+        function buyUpgrade(type) {
+            if (type === 'click') {
+                let cost = getClickCost();
+                if (points >= cost) {
+                    points -= cost;
+                    clickValue += 1;
+                } else {
+                    alert("Za mało punktów!");
+                }
+            } else if (type === 'auto') {
+                let cost = getAutoCost();
+                if (points >= cost) {
+                    points -= cost;
+                    autoClick += 1;
+                } else {
+                    alert("Za mało punktów!");
+                }
+            }
+            updateUI();
+        }
+
+        // Wysyłanie do bazy danych
+        async function saveGame() {
+            await fetch('/game/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    points: points, 
+                    clickValue: clickValue, 
+                    autoClickPerSecond: autoClick 
+                })
+            });
+            alert("Zapisano progres w MongoDB!");
+        }
+
+        // Odśwież widok przy wejściu na stronę
+        updateUI();
+    </script>
+</body>
+</html>
