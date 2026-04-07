@@ -3,11 +3,9 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-// Widoki
 router.get('/login', (req, res) => res.render('login'));
 router.get('/register', (req, res) => res.render('register'));
 
-// Logika rejestracji
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     const hashed = await bcrypt.hash(password, 10);
@@ -15,7 +13,6 @@ router.post('/register', async (req, res) => {
     res.redirect('/login');
 });
 
-// Logika logowania
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
